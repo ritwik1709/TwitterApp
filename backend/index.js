@@ -8,6 +8,8 @@ import bodyParser from 'body-parser';
 import stripePackage from 'stripe';
 import nodemailer from 'nodemailer';
 import { UAParser } from 'ua-parser-js';
+import path from 'path';
+import { fileURLToPath } from "url";
 
 dotenv.config(); // important step to work with .env file
 
@@ -15,7 +17,9 @@ const app = express();
 const port = process.env.PORT || 5000;
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 
-// app.use(cors());
+const __filename= fileURLToPath (import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors({
   origin: 'http://localhost:3000', // Allow requests from this origin
   methods: 'GET,POST,PATCH,DELETE,OPTIONS',
@@ -25,7 +29,12 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(useragent.express());
+app.use(express.static(path.join(__dirname,'./frontend/build')));
 
+//rest api
+app.use('*',function(req,res){
+  res.sendFile(path.join(__dirname,'./frontend/build/index.html'))
+})
 
 
 // Nodemailer setup
